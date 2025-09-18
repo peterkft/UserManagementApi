@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using UserManagementAPI.Models;
 using UserManagementAPI.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,13 +23,39 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/users", (UserService service) => service.GetAll());
+app.MapGet("/users", (UserService service, int? skip, int? take) =>
+{
+    var users = service.GetAll();
+    if (skip.HasValue || take.HasValue)
+    {
+        users = users.Skip(skip ?? 0).Take(take ?? users.Count).ToList();
+    }
+    return Results.Ok(users);
+});
 
 app.MapGet("/users/{id}", (int id, UserService service) =>
-    service.GetById(id) is User user ? Results.Ok(user) : Results.NotFound());
+{
+    try
+    {
+        var user = service.GetById(id);
+        return user is not null ? Results.Ok(user) : Results.NotFound();
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Unexpected error: {ex.Message}");
+    }
+});
+
 
 app.MapPost("/users", (User user, UserService service) =>
 {
+    var validationContext = new ValidationContext(user);
+    var results = new List<ValidationResult>();
+    if (!Validator.TryValidateObject(user, validationContext, results, true))
+    {
+        return Results.BadRequest(results);
+    }
+
     service.Add(user);
     return Results.Created($"/users/{user.Id}", user);
 });
