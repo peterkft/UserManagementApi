@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using UserManagementAPI.Middleware;
 using UserManagementAPI.Models;
 using UserManagementAPI.Services;
 
@@ -13,6 +14,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Order matters: Error → Auth → Logging
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<AuthenticationMiddleware>();
+app.UseMiddleware<LoggingMiddleware>();
+
+// Swagger and endpoints
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

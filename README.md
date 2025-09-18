@@ -1,3 +1,17 @@
+## Middleware Enhancements
+
+### Logging
+- Copilot generated middleware to log HTTP method, path, status code, and response time.
+
+### Error Handling
+- Suggested try-catch middleware with JSON error formatting.
+
+### Authentication
+- Helped write token validation logic and integrate it into the pipeline.
+
+### Pipeline Configuration
+- Ensured correct middleware order for reliability and security.
+
 ## Debugging Summary
 
 ### Issues Identified
